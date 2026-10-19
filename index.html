@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>División por 2 Cifras: Cajas con Unidades Visibles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Three.js + OrbitControls + Canvas Confetti -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --c-color: #bbf7d0;
+      --c-text: #15803d;
+      --d-color: #fef08a;
+      --d-text: #854d0e;
+      --u-color: #bae6fd;
+      --u-text: #0369a1;
+      --grid-border: #cbd5e1;
+      --panel-bg: rgba(255, 255, 255, 0.96);
+      --panel-border: #e2e8f0;
+      --primary: #0284c7;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      overflow: hidden;
+      font-family: 'Nunito', sans-serif;
+      background: radial-gradient(circle at 50% 20%, #fdfbf7 0%, #f1f5f9 60%, #e2e8f0 100%);
+      color: #0f172a;
+      width: 100vw;
+      height: 100vh;
+      touch-action: none;
+    }
+
+    #webgl-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Barra Superior */
+    header {
+      position: absolute;
+      top: 12px;
+      left: 16px;
+      right: 16px;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .config-card {
+      pointer-events: auto;
+      background: var(--panel-bg);
+      backdrop-filter: blur(14px);
+      padding: 6px 14px;
+      border-radius: 18px;
+      border: 2px solid var(--panel-border);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .input-grp {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 800;
+      font-size: 13px;
+      color: #334155;
+    }
+
+    .num-input {
+      width: 64px;
+      padding: 4px 6px;
+      border: 2px solid #cbd5e1;
+      border-radius: 10px;
+      background: #f8fafc;
+      color: #0369a1;
+      font-family: 'Fredoka', cursive;
+      font-size: 16px;
+      text-align: center;
+      outline: none;
+    }
+
+    .btn {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 7px 13px;
+      border-radius: 12px;
+      font-family: 'Fredoka', cursive;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: #0369a1;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1.5px solid #cbd5e1;
+    }
+
+    /* Muelle Escolar */
+    .school-dock {
+      position: absolute;
+      top: 70px;
+      left: 16px;
+      z-index: 10;
+      display: flex;
+      gap: 12px;
+      pointer-events: auto;
+      max-width: calc(100vw - 32px);
+    }
+
+    .steps-card {
+      background: var(--panel-bg);
+      backdrop-filter: blur(14px);
+      border-radius: 20px;
+      border: 2px solid var(--panel-border);
+      padding: 14px;
+      width: 320px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .steps-header {
+      font-family: 'Fredoka', cursive;
+      font-size: 16px;
+      color: #0f172a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 6px;
+    }
+
+    .timeline-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+    }
+
+    .timeline-steps::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      bottom: 12px;
+      left: 13px;
+      width: 2px;
+      background: #e2e8f0;
+      z-index: 1;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      position: relative;
+      z-index: 2;
+      opacity: 0.45;
+      transition: all 0.25s ease;
+    }
+
+    .step-item.active { opacity: 1; }
+
+    .step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #eff6ff;
+      border: 2px solid #bfdbfe;
+      color: #1d4ed8;
+      font-weight: 800;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-item.active .step-num {
+      background: #0284c7;
+      border-color: #0284c7;
+      color: white;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25);
+    }
+
+    .step-desc {
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.4;
+      color: #334155;
+    }
+
+    /* Cuadrícula Escolar */
+    .grid-card {
+      background: var(--panel-bg);
+      backdrop-filter: blur(14px);
+      border-radius: 20px;
+      border: 2px solid var(--panel-border);
+      padding: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .math-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 42px);
+      grid-template-rows: repeat(5, 42px);
+      gap: 0;
+      position: relative;
+    }
+
+    .grid-cell {
+      border: 1px dashed var(--grid-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fredoka', cursive;
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #0f172a;
+      position: relative;
+    }
+
+    .cell-c { background: var(--c-color); color: var(--c-text); border-style: solid; }
+    .cell-d { background: var(--d-color); color: var(--d-text); border-style: solid; }
+    .cell-u { background: var(--u-color); color: var(--u-text); border-style: solid; }
+    .sub-digit { color: #b45309; }
+
+    .divisor-line-v {
+      position: absolute;
+      width: 3px;
+      background: #0f172a;
+      z-index: 5;
+    }
+
+    .divisor-line-h {
+      position: absolute;
+      height: 3px;
+      background: #0f172a;
+      z-index: 5;
+    }
+
+    .minus-line {
+      position: absolute;
+      height: 3px;
+      background: #0f172a;
+      z-index: 4;
+    }
+
+    /* Barra Inferior */
+    .bottom-toolbar {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      padding: 9px 16px;
+      border-radius: 28px;
+      border: 2px solid var(--panel-border);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.08);
+      pointer-events: auto;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      outline: none;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-family: 'Fredoka', cursive;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #ffffff;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .action-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      filter: brightness(1.06);
+    }
+
+    .action-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-step { background: linear-gradient(135deg, #0284c7, #0369a1); }
+    .btn-pack-1 { background: linear-gradient(135deg, #059669, #047857); }
+    .btn-split-box { background: linear-gradient(135deg, #d97706, #b45309); }
+    .btn-split-bank { background: #64748b; }
+
+    @media (max-width: 900px) {
+      .school-dock { flex-direction: column; top: 105px; max-height: calc(100vh - 190px); overflow-y: auto; }
+      .steps-card { width: 280px; }
+      .math-grid { grid-template-columns: repeat(5, 34px); grid-template-rows: repeat(5, 34px); }
+      .grid-cell { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="webgl-container"></div>
+
+  <header>
+    <div class="config-card">
+      <div class="input-grp">
+        <span>Dividendo:</span>
+        <input type="number" id="inpDividend" class="num-input" min="10" max="999" value="84">
+      </div>
+      <div class="input-grp">
+        <span>Divisor:</span>
+        <input type="number" id="inpDivisor" class="num-input" min="10" max="99" value="21">
+      </div>
+      <button class="btn" onclick="initSimulation()"><i class="fa-solid fa-play"></i> Resolver</button>
+      <button class="btn btn-secondary" onclick="preset(84, 21)">84 ÷ 21</button>
+      <button class="btn btn-secondary" onclick="preset(96, 32)">96 ÷ 32</button>
+      <button class="btn btn-secondary" onclick="preset(68, 12)">68 ÷ 12</button>
+    </div>
+  </header>
+
+  <!-- Muelle Escolar -->
+  <div class="school-dock">
+    <div class="steps-card">
+      <div class="steps-header">
+        <span id="stepsTitle">Pasos para resolver 84 ÷ 21</span>
+      </div>
+      <div class="timeline-steps" id="timelineList"></div>
+    </div>
+
+    <div class="grid-card">
+      <div class="math-grid" id="mathGrid"></div>
+    </div>
+  </div>
+
+  <!-- Barra de Operaciones -->
+  <div class="bottom-toolbar">
+    <button class="action-btn btn-step" id="btnNextStep" onclick="advanceStep()">
+      <i class="fa-solid fa-forward-step"></i> Siguiente Paso del Algoritmo
+    </button>
+    <button class="action-btn btn-pack-1" id="btnPack1" onclick="packOneVisibleBox()">
+      <i class="fa-solid fa-box-open"></i> Llenar 1 Caja (<span id="lblCost1">21u</span>)
+    </button>
+    <button class="action-btn btn-split-box" id="btnSplitBoxes" onclick="unpackTensInsideBoxes()">
+      <i class="fa-solid fa-arrows-split-up-and-left"></i> Desagrupar Decenas en Cajas (Ver 1 a 1)
+    </button>
+    <button class="action-btn btn-split-bank" id="btnSplitD" onclick="splitBankD()">
+      <i class="fa-solid fa-scissors"></i> Canjear en Reserva (1D → 10U)
+    </button>
+    <button class="action-btn btn-split-bank" onclick="initSimulation()">
+      <i class="fa-solid fa-rotate-left"></i> Reiniciar
+    </button>
+  </div>
+
+  <script>
+    /* =========================================================================
+       1. ESCENA THREE.JS Y LUCES
+       ========================================================================= */
+    const container = document.getElementById('webgl-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf1f5f9);
+    scene.fog = new THREE.FogExp2(0xf1f5f9, 0.007);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 50, 64);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2.05;
+    controls.target.set(0, 2, 0);
+
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xe2e8f0, 0.95);
+    scene.add(hemiLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.25);
+    dirLight.position.set(24, 52, 24);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    // Mesa Principal
+    const tableMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(96, 1.5, 46),
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 })
+    );
+    tableMesh.position.y = -0.75;
+    tableMesh.receiveShadow = true;
+    scene.add(tableMesh);
+
+    // Divisor decorativo entre Reserva (izq) y Cajas Abiertas (der)
+    const divider = new THREE.Mesh(
+      new THREE.BoxGeometry(0.4, 0.4, 42),
+      new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.3 })
+    );
+    divider.position.set(-6, 0.2, 0);
+    scene.add(divider);
+
+    const tokensGroup = new THREE.Group();
+    scene.add(tokensGroup);
+
+    const cratesGroup = new THREE.Group();
+    scene.add(cratesGroup);
+
+    /* Texturas de Fichas Base 10 */
+    function createTokenTexture(label, bgHex, borderHex, textHex) {
+      const c = document.createElement('canvas');
+      c.width = 256; c.height = 256;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = bgHex;
+      ctx.beginPath(); ctx.arc(128, 128, 120, 0, Math.PI * 2); ctx.fill();
+      ctx.lineWidth = 14; ctx.strokeStyle = borderHex; ctx.stroke();
+      ctx.fillStyle = textHex;
+      ctx.font = 'bold 112px Fredoka, sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(label, 128, 134);
+      return new THREE.CanvasTexture(c);
+    }
+
+    const texC = createTokenTexture('C', '#dcfce7', '#16a34a', '#15803d');
+    const texD = createTokenTexture('D', '#fef9c3', '#eab308', '#854d0e');
+    const texU = createTokenTexture('U', '#e0f2fe', '#0284c7', '#0369a1');
+    const geomCylinder = new THREE.CylinderGeometry(1.05, 1.05, 0.34, 32);
+
+    function createTokenMesh(type) {
+      let topTex = (type === 'c') ? texC : (type === 'd' ? texD : texU);
+      let sideColor = (type === 'c') ? 0x16a34a : (type === 'd' ? 0xeab308 : 0x0284c7);
+      const mats = [
+        new THREE.MeshStandardMaterial({ color: sideColor, roughness: 0.3 }),
+        new THREE.MeshStandardMaterial({ map: topTex, roughness: 0.25 }),
+        new THREE.MeshStandardMaterial({ map: topTex, roughness: 0.25 })
+      ];
+      const mesh = new THREE.Mesh(geomCylinder, mats);
+      mesh.castShadow = true;
+      mesh.userData = { type: type, location: 'bank' };
+      return mesh;
+    }
+
+    /* Construcción de Caja Abierta de Madera / Plástico con paredes bajas */
+    function createOpenCrateMesh(index, width = 7.6, depth = 11.2) {
+      const crate = new THREE.Group();
+      const wallMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.3 });
+      const floorMat = new THREE.MeshStandardMaterial({ color: 0xf0f9ff, roughness: 0.4 });
+
+      // Suelo de la caja
+      const floor = new THREE.Mesh(new THREE.BoxGeometry(width, 0.15, depth), floorMat);
+      floor.position.y = 0.08;
+      floor.receiveShadow = true;
+      crate.add(floor);
+
+      // Paredes perimetrales bajas (permiten visibilidad total)
+      const h = 0.8;
+      const th = 0.25;
+
+      const back = new THREE.Mesh(new THREE.BoxGeometry(width, h, th), wallMat);
+      back.position.set(0, h / 2, -depth / 2);
+      crate.add(back);
+
+      const front = new THREE.Mesh(new THREE.BoxGeometry(width, h, th), wallMat);
+      front.position.set(0, h / 2, depth / 2);
+      crate.add(front);
+
+      const left = new THREE.Mesh(new THREE.BoxGeometry(th, h, depth), wallMat);
+      left.position.set(-width / 2, h / 2, 0);
+      crate.add(left);
+
+      const right = new THREE.Mesh(new THREE.BoxGeometry(th, h, depth), wallMat);
+      right.position.set(width / 2, h / 2, 0);
+      crate.add(right);
+
+      // Etiqueta frontal con el número de caja
+      const labelC = document.createElement('canvas');
+      labelC.width = 256; labelC.height = 64;
+      const lctx = labelC.getContext('2d');
+      lctx.fillStyle = '#0369a1';
+      lctx.font = 'bold 36px Fredoka, sans-serif';
+      lctx.textAlign = 'center';
+      lctx.fillText(`Caja ${index + 1}`, 128, 46);
+      const lTex = new THREE.CanvasTexture(labelC);
+      const labelMesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(width * 0.8, 1.2),
+        new THREE.MeshBasicMaterial({ map: lTex, transparent: true })
+      );
+      labelMesh.rotation.x = -Math.PI / 2;
+      labelMesh.position.set(0, 0.16, -depth / 2 + 1.2);
+      crate.add(labelMesh);
+
+      crate.userData = { width, depth, index };
+      return crate;
+    }
+
+    /* =========================================================================
+       2. ESTADO Y CANJES
+       ========================================================================= */
+    let dividend = 84;
+    let divisor = 21;
+    let currentStep = 0;
+    let stepsList = [];
+
+    let bankTokens = { c: [], d: [], u: [] };
+    let cratesData = []; // [{ crateMesh, tokens: [] }]
+    const activeAnimations = [];
+
+    function preset(div, dis) {
+      document.getElementById('inpDividend').value = div;
+      document.getElementById('inpDivisor').value = dis;
+      initSimulation();
+    }
+
+    function initSimulation() {
+      dividend = parseInt(document.getElementById('inpDividend').value);
+      divisor = parseInt(document.getElementById('inpDivisor').value);
+
+      if (isNaN(dividend) || isNaN(divisor) || divisor < 10) return;
+
+      while (tokensGroup.children.length > 0) tokensGroup.remove(tokensGroup.children[0]);
+      while (cratesGroup.children.length > 0) cratesGroup.remove(cratesGroup.children[0]);
+      activeAnimations.length = 0;
+
+      bankTokens = { c: [], d: [], u: [] };
+      cratesData = [];
+
+      const countC = Math.floor(dividend / 100);
+      const countD = Math.floor((dividend % 100) / 10);
+      const countU = dividend % 10;
+
+      for (let i = 0; i < countC; i++) spawnTokenInBank('c');
+      for (let i = 0; i < countD; i++) spawnTokenInBank('d');
+      for (let i = 0; i < countU; i++) spawnTokenInBank('u');
+
+      document.getElementById('stepsTitle').textContent = `Pasos para resolver ${dividend} ÷ ${divisor}`;
+      document.getElementById('lblCost1').textContent = `${divisor}u`;
+
+      generateDidacticPlan();
+      currentStep = 0;
+      renderTimeline();
+      renderEmptyGrid();
+      applyStepToGrid(0);
+      reflowBank();
+    }
+
+    function spawnTokenInBank(type) {
+      const tok = createTokenMesh(type);
+      tokensGroup.add(tok);
+      bankTokens[type].push(tok);
+    }
+
+    function snapTo(mesh, targetPos, speed = 0.22) {
+      for (let i = activeAnimations.length - 1; i >= 0; i--) {
+        if (activeAnimations[i].mesh === mesh) activeAnimations.splice(i, 1);
+      }
+      activeAnimations.push({
+        mesh, startPos: mesh.position.clone(), endPos: targetPos.clone(), progress: 0, speed
+      });
+    }
+
+    function reflowBank() {
+      // Centenas
+      bankTokens.c.forEach((tok, i) => {
+        snapTo(tok, new THREE.Vector3(-38, 0.35 + (i * 0.38), -8));
+      });
+      // Decenas
+      bankTokens.d.forEach((tok, i) => {
+        const stack = Math.floor(i / 10);
+        const h = i % 10;
+        snapTo(tok, new THREE.Vector3(-28 + (stack * 2.5), 0.35 + (h * 0.38), -8));
+      });
+      // Unidades
+      bankTokens.u.forEach((tok, i) => {
+        const stack = Math.floor(i / 10);
+        const h = i % 10;
+        snapTo(tok, new THREE.Vector3(-18 + (stack * 2.5), 0.35 + (h * 0.38), -8));
+      });
+    }
+
+    function splitBankD() {
+      if (bankTokens.d.length === 0) return;
+      const tokD = bankTokens.d.pop();
+      tokensGroup.remove(tokD);
+      for (let i = 0; i < 10; i++) spawnTokenInBank('u');
+      reflowBank();
+    }
+
+    /* =========================================================================
+       3. LLENAR CAJAS ABIERTAS CON FICHAS VISIBLES ADENTRO
+       ========================================================================= */
+    function packOneVisibleBox() {
+      const reqD = Math.floor(divisor / 10);
+      const reqU = divisor % 10;
+
+      const totalBank = (bankTokens.c.length * 100) + (bankTokens.d.length * 10) + bankTokens.u.length;
+      if (totalBank < divisor) {
+        alert(`No alcanzan las fichas en reserva (${totalBank}u) para llenar otra caja de ${divisor}.`);
+        return;
+      }
+
+      // Desagrupar en reserva si faltan unidades
+      while (bankTokens.u.length < reqU && bankTokens.d.length > 0) {
+        splitBankD();
+      }
+
+      // Tomar las fichas físicas exactas del banco
+      const boxTokens = [];
+      for (let i = 0; i < reqD; i++) {
+        if (bankTokens.d.length > 0) {
+          const tok = bankTokens.d.pop();
+          tok.userData.location = 'crate';
+          boxTokens.push(tok);
+        }
+      }
+      for (let i = 0; i < reqU; i++) {
+        if (bankTokens.u.length > 0) {
+          const tok = bankTokens.u.pop();
+          tok.userData.location = 'crate';
+          boxTokens.push(tok);
+        }
+      }
+
+      reflowBank();
+
+      // Crear caja organizadora abierta 3D
+      const crateIdx = cratesData.length;
+      const crateMesh = createOpenCrateMesh(crateIdx);
+
+      // Posicionar cajas abiertas en fila o matriz
+      const col = crateIdx % 4;
+      const row = Math.floor(crateIdx / 4);
+      const crateX = 2 + (col * 8.6);
+      const crateZ = -6 + (row * 12.5);
+
+      crateMesh.position.set(crateX, 0, crateZ);
+      cratesGroup.add(crateMesh);
+
+      const crateRecord = { crateMesh, tokens: boxTokens };
+      cratesData.push(crateRecord);
+
+      reflowTokensInsideCrate(crateRecord);
+    }
+
+    /* Organiza las fichas dentro de la caja de forma perfectamente visible */
+    function reflowTokensInsideCrate(crateRecord) {
+      const cratePos = crateRecord.crateMesh.position;
+      const tokens = crateRecord.tokens;
+
+      const dTokens = tokens.filter(t => t.userData.type === 'd');
+      const uTokens = tokens.filter(t => t.userData.type === 'u');
+
+      // Decenas ordenadas en la mitad izquierda de la caja
+      dTokens.forEach((t, i) => {
+        const posX = cratePos.x - 1.8;
+        const posZ = cratePos.z - 2.2 + (i * 2.6);
+        snapTo(t, new THREE.Vector3(posX, 0.35, posZ));
+      });
+
+      // Unidades ordenadas en columnas en la mitad derecha de la caja
+      uTokens.forEach((t, i) => {
+        const col = i % 2;
+        const row = Math.floor(i / 2);
+        const posX = cratePos.x + 0.8 + (col * 2.2);
+        const posZ = cratePos.z - 3.4 + (row * 1.5);
+        snapTo(t, new THREE.Vector3(posX, 0.35, posZ));
+      });
+    }
+
+    /* DESAGRUPAR DECENAS DENTRO DE LAS CAJAS PARA VER LAS 21 UNIDADES REALES */
+    function unpackTensInsideBoxes() {
+      let unbundledAny = false;
+
+      cratesData.forEach(crateRecord => {
+        const dTokens = crateRecord.tokens.filter(t => t.userData.type === 'd');
+        if (dTokens.length > 0) {
+          // Tomar 1 decena de la caja y canjearla por 10 unidades dentro de la misma caja
+          const tokD = dTokens.pop();
+          const idx = crateRecord.tokens.indexOf(tokD);
+          if (idx !== -1) crateRecord.tokens.splice(idx, 1);
+          tokensGroup.remove(tokD);
+
+          const spawnPos = tokD.position.clone();
+
+          for (let i = 0; i < 10; i++) {
+            const newU = createTokenMesh('u');
+            newU.userData.location = 'crate';
+            newU.position.set(spawnPos.x, spawnPos.y + (i * 0.2), spawnPos.z);
+            tokensGroup.add(newU);
+            crateRecord.tokens.push(newU);
+          }
+
+          reflowTokensInsideCrate(crateRecord);
+          unbundledAny = true;
+        }
+      });
+
+      if (unbundledAny) {
+        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+      } else {
+        alert("Ya todas las decenas en las cajas han sido desagrupadas en unidades.");
+      }
+    }
+
+    /* =========================================================================
+       4. SECUENCIA DIDÁCTICA Y CUADRÍCULA (Basada en la imagen)
+       ========================================================================= */
+    function generateDidacticPlan() {
+      stepsList = [];
+      const divStr = dividend.toString();
+      const disStr = divisor.toString();
+      const firstDivisorDigit = parseInt(disStr[0]);
+      const dDigit = parseInt(divStr[0]);
+      const estimatedQ = Math.floor(dividend / divisor);
+      const product = estimatedQ * divisor;
+      const rem = dividend - product;
+
+      stepsList.push({
+        step: 1,
+        title: "Comparamos las cifras de las decenas.",
+        action: "compare_d"
+      });
+
+      stepsList.push({
+        step: 2,
+        title: `Como ${dDigit} ÷ ${firstDivisorDigit} = ${estimatedQ}, escribimos ${estimatedQ} en la posición de las unidades del cociente.`,
+        action: "write_q_u"
+      });
+
+      stepsList.push({
+        step: 3,
+        title: `Calculamos ${estimatedQ} x ${divisor} = ${product}, restamos ${dividend} - ${product} = ${rem}.`,
+        action: "subtract"
+      });
+
+      stepsList.push({
+        step: 4,
+        title: `Por lo tanto, el cociente de ${dividend} ÷ ${divisor} es ${estimatedQ} y el residuo es ${rem}.`,
+        action: "finish"
+      });
+    }
+
+    function renderTimeline() {
+      const list = document.getElementById('timelineList');
+      list.innerHTML = '';
+      stepsList.forEach((st, idx) => {
+        const item = document.createElement('div');
+        item.className = `step-item ${idx <= currentStep ? 'active' : ''}`;
+        item.innerHTML = `
+          <div class="step-num">${st.step}</div>
+          <div class="step-desc">${st.title}</div>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function renderEmptyGrid() {
+      const grid = document.getElementById('mathGrid');
+      grid.innerHTML = '';
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'grid-cell';
+          cell.id = `g_${r}_${c}`;
+          grid.appendChild(cell);
+        }
+      }
+      setGrid(0, 1, 'D', 'cell-d');
+      setGrid(0, 2, 'U', 'cell-u');
+      drawGalera();
+    }
+
+    function setGrid(r, c, text, cls = '') {
+      const el = document.getElementById(`g_${r}_${c}`);
+      if (el) {
+        el.textContent = text;
+        if (cls) el.className = `grid-cell ${cls}`;
+      }
+    }
+
+    function drawGalera() {
+      const grid = document.getElementById('mathGrid');
+      const CELL = 42;
+      const v = document.createElement('div');
+      v.className = 'divisor-line-v';
+      v.style.left = `${3 * CELL}px`;
+      v.style.top = `${1 * CELL}px`;
+      v.style.height = `${CELL + 2}px`;
+      grid.appendChild(v);
+
+      const h = document.createElement('div');
+      h.className = 'divisor-line-h';
+      h.style.left = `${3 * CELL}px`;
+      h.style.top = `${2 * CELL}px`;
+      h.style.width = `${2 * CELL}px`;
+      grid.appendChild(h);
+    }
+
+    function drawMinusLine(row) {
+      const grid = document.getElementById('mathGrid');
+      const CELL = 42;
+      const m = document.createElement('div');
+      m.className = 'minus-line';
+      m.style.left = `4px`;
+      m.style.top = `${(row + 1) * CELL}px`;
+      m.style.width = `${3 * CELL - 8}px`;
+      grid.appendChild(m);
+    }
+
+    function applyStepToGrid(stepIdx) {
+      const divStr = dividend.toString();
+      const disStr = divisor.toString();
+
+      setGrid(1, 1, divStr[0]);
+      setGrid(1, 2, divStr[1]);
+      setGrid(1, 3, disStr[0]);
+      setGrid(1, 4, disStr[1]);
+
+      if (stepIdx >= 1) {
+        const qVal = Math.floor(dividend / divisor);
+        setGrid(2, 3, qVal.toString());
+        setGrid(3, 3, 'U', 'cell-u');
+      }
+
+      if (stepIdx >= 2) {
+        const qVal = Math.floor(dividend / divisor);
+        const prodStr = (qVal * divisor).toString();
+        setGrid(2, 0, '—');
+        setGrid(2, 1, prodStr[0], 'sub-digit');
+        setGrid(2, 2, prodStr[1], 'sub-digit');
+        drawMinusLine(2);
+
+        const rem = dividend % divisor;
+        setGrid(3, 2, rem.toString());
+      }
+    }
+
+    function advanceStep() {
+      if (currentStep < stepsList.length - 1) {
+        currentStep++;
+        renderTimeline();
+        applyStepToGrid(currentStep);
+
+        // Al llegar al paso de estimar/comprobar, llena automáticamente las cajas con sus fichas
+        if (currentStep === 2) {
+          const q = Math.floor(dividend / divisor);
+          for (let i = 0; i < q; i++) {
+            setTimeout(() => packOneVisibleBox(), i * 160);
+          }
+        }
+      }
+    }
+
+    /* Bucle Render */
+    function animate() {
+      requestAnimationFrame(animate);
+
+      for (let i = activeAnimations.length - 1; i >= 0; i--) {
+        const anim = activeAnimations[i];
+        anim.progress += anim.speed;
+        if (anim.progress >= 1) {
+          anim.mesh.position.copy(anim.endPos);
+          activeAnimations.splice(i, 1);
+        } else {
+          const ease = Math.sin(anim.progress * (Math.PI / 2));
+          anim.mesh.position.lerpVectors(anim.startPos, anim.endPos, ease);
+          anim.mesh.position.y += Math.sin(anim.progress * Math.PI) * 1.5;
+        }
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      animate();
+      initSimulation();
+    });
+  </script>
+</body>
+</html>
