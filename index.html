@@ -94,7 +94,7 @@
     }
 
     .num-input {
-      width: 64px;
+      width: 68px;
       padding: 4px 6px;
       border: 2px solid #cbd5e1;
       border-radius: 10px;
@@ -132,10 +132,15 @@
       border: 1.5px solid #cbd5e1;
     }
 
+    .btn-secondary:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
     /* Muelle Escolar */
     .school-dock {
       position: absolute;
-      top: 70px;
+      top: 68px;
       left: 16px;
       z-index: 10;
       display: flex;
@@ -150,7 +155,7 @@
       border-radius: 20px;
       border: 2px solid var(--panel-border);
       padding: 14px;
-      width: 320px;
+      width: 310px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.06);
       display: flex;
       flex-direction: column;
@@ -159,7 +164,7 @@
 
     .steps-header {
       font-family: 'Fredoka', cursive;
-      font-size: 16px;
+      font-size: 15px;
       color: #0f172a;
       display: flex;
       justify-content: space-between;
@@ -242,8 +247,8 @@
 
     .math-grid {
       display: grid;
-      grid-template-columns: repeat(5, 42px);
-      grid-template-rows: repeat(5, 42px);
+      grid-template-columns: repeat(6, 40px);
+      grid-template-rows: repeat(6, 40px);
       gap: 0;
       position: relative;
     }
@@ -254,7 +259,7 @@
       align-items: center;
       justify-content: center;
       font-family: 'Fredoka', cursive;
-      font-size: 1.45rem;
+      font-size: 1.4rem;
       font-weight: 700;
       color: #0f172a;
       position: relative;
@@ -307,6 +312,31 @@
       overflow-x: auto;
     }
 
+    .bank-live-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 800;
+      background: #f1f5f9;
+      border: 1.5px solid #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 12px;
+      color: #334155;
+      white-space: nowrap;
+    }
+
+    .badge-pill {
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: 'Fredoka', cursive;
+      font-size: 13px;
+    }
+
+    .pill-c { background: var(--c-color); color: var(--c-text); }
+    .pill-d { background: var(--d-color); color: var(--d-text); }
+    .pill-u { background: var(--u-color); color: var(--u-text); }
+
     .action-btn {
       display: flex;
       align-items: center;
@@ -337,14 +367,18 @@
 
     .btn-step { background: linear-gradient(135deg, #0284c7, #0369a1); }
     .btn-pack-1 { background: linear-gradient(135deg, #059669, #047857); }
+    .btn-split-c { background: linear-gradient(135deg, #16a34a, #15803d); }
+    .btn-split-d { background: linear-gradient(135deg, #eab308, #ca8a04); color: #713f12; }
     .btn-split-box { background: linear-gradient(135deg, #d97706, #b45309); }
     .btn-split-bank { background: #64748b; }
 
-    @media (max-width: 900px) {
+    @media (max-width: 960px) {
       .school-dock { flex-direction: column; top: 105px; max-height: calc(100vh - 190px); overflow-y: auto; }
       .steps-card { width: 280px; }
-      .math-grid { grid-template-columns: repeat(5, 34px); grid-template-rows: repeat(5, 34px); }
-      .grid-cell { font-size: 1.2rem; }
+      .math-grid { grid-template-columns: repeat(6, 32px); grid-template-rows: repeat(6, 32px); }
+      .grid-cell { font-size: 1.15rem; }
+      .bottom-toolbar { bottom: 8px; padding: 6px 10px; gap: 5px; }
+      .action-btn { padding: 6px 10px; font-size: 11.5px; }
     }
   </style>
 </head>
@@ -356,14 +390,16 @@
     <div class="config-card">
       <div class="input-grp">
         <span>Dividendo:</span>
-        <input type="number" id="inpDividend" class="num-input" min="10" max="999" value="84">
+        <input type="number" id="inpDividend" class="num-input" min="10" max="999" value="144">
       </div>
       <div class="input-grp">
         <span>Divisor:</span>
-        <input type="number" id="inpDivisor" class="num-input" min="10" max="99" value="21">
+        <input type="number" id="inpDivisor" class="num-input" min="10" max="99" value="24">
       </div>
       <button class="btn" onclick="initSimulation()"><i class="fa-solid fa-play"></i> Resolver</button>
-      <button class="btn btn-secondary" onclick="preset(84, 21)">84 ÷ 21</button>
+      <button class="btn btn-secondary" onclick="preset(144, 24)">144 ÷ 24 (Centena)</button>
+      <button class="btn btn-secondary" onclick="preset(288, 24)">288 ÷ 24 (2 Centenas)</button>
+      <button class="btn btn-secondary" onclick="preset(84, 21)">84 ÷ 21 (Decenas)</button>
       <button class="btn btn-secondary" onclick="preset(96, 32)">96 ÷ 32</button>
       <button class="btn btn-secondary" onclick="preset(68, 12)">68 ÷ 12</button>
     </div>
@@ -373,7 +409,7 @@
   <div class="school-dock">
     <div class="steps-card">
       <div class="steps-header">
-        <span id="stepsTitle">Pasos para resolver 84 ÷ 21</span>
+        <span id="stepsTitle">Pasos de la División</span>
       </div>
       <div class="timeline-steps" id="timelineList"></div>
     </div>
@@ -383,20 +419,42 @@
     </div>
   </div>
 
-  <!-- Barra de Operaciones -->
+  <!-- Barra de Operaciones con Desagrupación en Dividendo -->
   <div class="bottom-toolbar">
-    <button class="action-btn btn-step" id="btnNextStep" onclick="advanceStep()">
-      <i class="fa-solid fa-forward-step"></i> Siguiente Paso del Algoritmo
+    <!-- Indicador en Vivo del Dividendo -->
+    <div class="bank-live-badge" title="Fichas disponibles en el dividendo">
+      <span>Dividendo:</span>
+      <span class="badge-pill pill-c" id="badgeCountC">0 C</span>
+      <span class="badge-pill pill-d" id="badgeCountD">0 D</span>
+      <span class="badge-pill pill-u" id="badgeCountU">0 U</span>
+      <span style="color:#0284c7; font-weight:800;" id="badgeTotalU">(0u)</span>
+    </div>
+
+    <!-- Botón Desagrupar Centenas en Dividendo -->
+    <button class="action-btn btn-split-c" id="btnSplitC" onclick="splitBankC()" title="Canjear 1 Centena en 10 Decenas">
+      <i class="fa-solid fa-scissors"></i> Canjear C en Reserva (1C → 10D)
     </button>
-    <button class="action-btn btn-pack-1" id="btnPack1" onclick="packOneVisibleBox()">
-      <i class="fa-solid fa-box-open"></i> Llenar 1 Caja (<span id="lblCost1">21u</span>)
+
+    <!-- Botón Desagrupar Decenas en Dividendo -->
+    <button class="action-btn btn-split-d" id="btnSplitD" onclick="splitBankD()" title="Canjear 1 Decena en 10 Unidades">
+      <i class="fa-solid fa-scissors"></i> Canjear D en Reserva (1D → 10U)
     </button>
+
+    <!-- Llenar Caja Abierta -->
+    <button class="action-btn btn-pack-1" id="btnPack1" onclick="packOneVisibleBox(false)">
+      <i class="fa-solid fa-box-open"></i> Llenar 1 Caja (<span id="lblCost1">24u</span>)
+    </button>
+
+    <!-- Desagrupar dentro de las cajas -->
     <button class="action-btn btn-split-box" id="btnSplitBoxes" onclick="unpackTensInsideBoxes()">
-      <i class="fa-solid fa-arrows-split-up-and-left"></i> Desagrupar Decenas en Cajas (Ver 1 a 1)
+      <i class="fa-solid fa-arrows-split-up-and-left"></i> Desagrupar D en Cajas
     </button>
-    <button class="action-btn btn-split-bank" id="btnSplitD" onclick="splitBankD()">
-      <i class="fa-solid fa-scissors"></i> Canjear en Reserva (1D → 10U)
+
+    <!-- Avanzar paso guiado -->
+    <button class="action-btn btn-step" id="btnNextStep" onclick="advanceStep()">
+      <i class="fa-solid fa-forward-step"></i> Siguiente Paso
     </button>
+
     <button class="action-btn btn-split-bank" onclick="initSimulation()">
       <i class="fa-solid fa-rotate-left"></i> Reiniciar
     </button>
@@ -404,7 +462,7 @@
 
   <script>
     /* =========================================================================
-       1. ESCENA THREE.JS Y LUCES
+       1. ESCENA THREE.JS Y ELEMENTOS 3D
        ========================================================================= */
     const container = document.getElementById('webgl-container');
     const scene = new THREE.Scene();
@@ -412,7 +470,7 @@
     scene.fog = new THREE.FogExp2(0xf1f5f9, 0.007);
 
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 50, 64);
+    camera.position.set(0, 52, 66);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -438,19 +496,19 @@
 
     // Mesa Principal
     const tableMesh = new THREE.Mesh(
-      new THREE.BoxGeometry(96, 1.5, 46),
+      new THREE.BoxGeometry(98, 1.5, 48),
       new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 })
     );
     tableMesh.position.y = -0.75;
     tableMesh.receiveShadow = true;
     scene.add(tableMesh);
 
-    // Divisor decorativo entre Reserva (izq) y Cajas Abiertas (der)
+    // Divisoria entre Reserva de Dividendo (izq) y Cajas Abiertas (der)
     const divider = new THREE.Mesh(
-      new THREE.BoxGeometry(0.4, 0.4, 42),
+      new THREE.BoxGeometry(0.4, 0.4, 44),
       new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.3 })
     );
-    divider.position.set(-6, 0.2, 0);
+    divider.position.set(-7, 0.2, 0);
     scene.add(divider);
 
     const tokensGroup = new THREE.Group();
@@ -459,7 +517,7 @@
     const cratesGroup = new THREE.Group();
     scene.add(cratesGroup);
 
-    /* Texturas de Fichas Base 10 */
+    /* Texturas Fichas Base 10 */
     function createTokenTexture(label, bgHex, borderHex, textHex) {
       const c = document.createElement('canvas');
       c.width = 256; c.height = 256;
@@ -489,43 +547,37 @@
       ];
       const mesh = new THREE.Mesh(geomCylinder, mats);
       mesh.castShadow = true;
-      mesh.userData = { type: type, location: 'bank' };
+      mesh.userData = { type: type, location: 'bank', crateIdx: -1 };
       return mesh;
     }
 
-    /* Construcción de Caja Abierta de Madera / Plástico con paredes bajas */
+    /* Caja Abierta con Visibilidad Total */
     function createOpenCrateMesh(index, width = 7.6, depth = 11.2) {
       const crate = new THREE.Group();
       const wallMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.3 });
       const floorMat = new THREE.MeshStandardMaterial({ color: 0xf0f9ff, roughness: 0.4 });
 
-      // Suelo de la caja
       const floor = new THREE.Mesh(new THREE.BoxGeometry(width, 0.15, depth), floorMat);
       floor.position.y = 0.08;
       floor.receiveShadow = true;
       crate.add(floor);
 
-      // Paredes perimetrales bajas (permiten visibilidad total)
       const h = 0.8;
       const th = 0.25;
 
       const back = new THREE.Mesh(new THREE.BoxGeometry(width, h, th), wallMat);
-      back.position.set(0, h / 2, -depth / 2);
-      crate.add(back);
+      back.position.set(0, h / 2, -depth / 2); crate.add(back);
 
       const front = new THREE.Mesh(new THREE.BoxGeometry(width, h, th), wallMat);
-      front.position.set(0, h / 2, depth / 2);
-      crate.add(front);
+      front.position.set(0, h / 2, depth / 2); crate.add(front);
 
       const left = new THREE.Mesh(new THREE.BoxGeometry(th, h, depth), wallMat);
-      left.position.set(-width / 2, h / 2, 0);
-      crate.add(left);
+      left.position.set(-width / 2, h / 2, 0); crate.add(left);
 
       const right = new THREE.Mesh(new THREE.BoxGeometry(th, h, depth), wallMat);
-      right.position.set(width / 2, h / 2, 0);
-      crate.add(right);
+      right.position.set(width / 2, h / 2, 0); crate.add(right);
 
-      // Etiqueta frontal con el número de caja
+      // Etiqueta numerada
       const labelC = document.createElement('canvas');
       labelC.width = 256; labelC.height = 64;
       const lctx = labelC.getContext('2d');
@@ -547,15 +599,15 @@
     }
 
     /* =========================================================================
-       2. ESTADO Y CANJES
+       2. ESTADO GLOBAL Y DISTRIBUCIÓN
        ========================================================================= */
-    let dividend = 84;
-    let divisor = 21;
+    let dividend = 144;
+    let divisor = 24;
     let currentStep = 0;
     let stepsList = [];
 
     let bankTokens = { c: [], d: [], u: [] };
-    let cratesData = []; // [{ crateMesh, tokens: [] }]
+    let cratesData = [];
     const activeAnimations = [];
 
     function preset(div, dis) {
@@ -585,7 +637,7 @@
       for (let i = 0; i < countD; i++) spawnTokenInBank('d');
       for (let i = 0; i < countU; i++) spawnTokenInBank('u');
 
-      document.getElementById('stepsTitle').textContent = `Pasos para resolver ${dividend} ÷ ${divisor}`;
+      document.getElementById('stepsTitle').textContent = `Pasos para ${dividend} ÷ ${divisor}`;
       document.getElementById('lblCost1').textContent = `${divisor}u`;
 
       generateDidacticPlan();
@@ -594,6 +646,7 @@
       renderEmptyGrid();
       applyStepToGrid(0);
       reflowBank();
+      updateBadgeCounts();
     }
 
     function spawnTokenInBank(type) {
@@ -611,75 +664,174 @@
       });
     }
 
+    /* Ubicación ordenada sin colisiones en la reserva */
     function reflowBank() {
-      // Centenas
+      // Centenas: Columna en X = -40
       bankTokens.c.forEach((tok, i) => {
-        snapTo(tok, new THREE.Vector3(-38, 0.35 + (i * 0.38), -8));
+        const stack = Math.floor(i / 10);
+        const h = i % 10;
+        snapTo(tok, new THREE.Vector3(-40, 0.35 + (h * 0.38), -12 + (stack * 3.4)));
       });
-      // Decenas
+
+      // Decenas: Columnas en X = -29 a -26
       bankTokens.d.forEach((tok, i) => {
         const stack = Math.floor(i / 10);
         const h = i % 10;
-        snapTo(tok, new THREE.Vector3(-28 + (stack * 2.5), 0.35 + (h * 0.38), -8));
+        const colX = Math.floor(stack / 7) * 2.8;
+        const localStackZ = stack % 7;
+        snapTo(tok, new THREE.Vector3(-29 + colX, 0.35 + (h * 0.38), -13 + (localStackZ * 3.4)));
       });
-      // Unidades
+
+      // Unidades: Columnas en X = -19 a -11
       bankTokens.u.forEach((tok, i) => {
         const stack = Math.floor(i / 10);
         const h = i % 10;
-        snapTo(tok, new THREE.Vector3(-18 + (stack * 2.5), 0.35 + (h * 0.38), -8));
+        const colX = Math.floor(stack / 8) * 2.5;
+        const localStackZ = stack % 8;
+        snapTo(tok, new THREE.Vector3(-19 + colX, 0.35 + (h * 0.38), -13 + (localStackZ * 3.4)));
       });
+
+      updateBadgeCounts();
+    }
+
+    function updateBadgeCounts() {
+      const c = bankTokens.c.length;
+      const d = bankTokens.d.length;
+      const u = bankTokens.u.length;
+      const total = (c * 100) + (d * 10) + u;
+
+      document.getElementById('badgeCountC').textContent = `${c} C`;
+      document.getElementById('badgeCountD').textContent = `${d} D`;
+      document.getElementById('badgeCountU').textContent = `${u} U`;
+      document.getElementById('badgeTotalU').textContent = `(${total}u)`;
+
+      document.getElementById('btnSplitC').disabled = (c === 0);
+      document.getElementById('btnSplitD').disabled = (d === 0);
+    }
+
+    /* =========================================================================
+       3. DESAGRUPACIÓN EN EL DIVIDENDO (CANJE 1C → 10D y 1D → 10U)
+       ========================================================================= */
+    function splitBankC() {
+      if (bankTokens.c.length === 0) return;
+      const tokC = bankTokens.c.pop();
+      const spawnPos = tokC.position.clone();
+      tokensGroup.remove(tokC);
+
+      for (let i = 0; i < 10; i++) {
+        const newD = createTokenMesh('d');
+        newD.position.set(spawnPos.x, spawnPos.y + 0.6 + (i * 0.15), spawnPos.z);
+        tokensGroup.add(newD);
+        bankTokens.d.push(newD);
+      }
+
+      reflowBank();
+      playRealisticSound('exchange');
     }
 
     function splitBankD() {
       if (bankTokens.d.length === 0) return;
       const tokD = bankTokens.d.pop();
+      const spawnPos = tokD.position.clone();
       tokensGroup.remove(tokD);
-      for (let i = 0; i < 10; i++) spawnTokenInBank('u');
+
+      for (let i = 0; i < 10; i++) {
+        const newU = createTokenMesh('u');
+        newU.position.set(spawnPos.x, spawnPos.y + 0.6 + (i * 0.15), spawnPos.z);
+        tokensGroup.add(newU);
+        bankTokens.u.push(newU);
+      }
+
       reflowBank();
+      playRealisticSound('exchange');
     }
 
-    /* =========================================================================
-       3. LLENAR CAJAS ABIERTAS CON FICHAS VISIBLES ADENTRO
-       ========================================================================= */
-    function packOneVisibleBox() {
-      const reqD = Math.floor(divisor / 10);
-      const reqU = divisor % 10;
+    /* Soporte de Doble Clic en Escena para Desagrupar Fichas del Dividendo */
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
 
+    renderer.domElement.addEventListener('dblclick', (e) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+
+      const intersects = raycaster.intersectObjects(tokensGroup.children, true);
+      if (intersects.length > 0) {
+        let picked = intersects[0].object;
+        if (picked.userData && picked.userData.location === 'bank') {
+          if (picked.userData.type === 'c') {
+            splitBankC();
+          } else if (picked.userData.type === 'd') {
+            splitBankD();
+          }
+        }
+      }
+    });
+
+    /* =========================================================================
+       4. LLENADO DE CAJAS ABIERTAS CON UNIDADES VISIBLES
+       ========================================================================= */
+    function packOneVisibleBox(autoUnbundle = false) {
       const totalBank = (bankTokens.c.length * 100) + (bankTokens.d.length * 10) + bankTokens.u.length;
       if (totalBank < divisor) {
-        alert(`No alcanzan las fichas en reserva (${totalBank}u) para llenar otra caja de ${divisor}.`);
+        alert(`No alcanzan las fichas en reserva (${totalBank}u) para armar otra caja de ${divisor}u.`);
         return;
       }
 
-      // Desagrupar en reserva si faltan unidades
-      while (bankTokens.u.length < reqU && bankTokens.d.length > 0) {
-        splitBankD();
+      const reqD = Math.floor(divisor / 10);
+      const reqU = divisor % 10;
+
+      // Si se ejecuta manualmente sin suficientes decenas, orientar al alumno a canjear
+      if (!autoUnbundle) {
+        if (bankTokens.d.length < reqD && bankTokens.c.length > 0) {
+          alert(`¡No tienes suficientes decenas sueltas para la caja! Usa el botón "Canjear C en Reserva (1C → 10D)" para desagrupar tu centena.`);
+          return;
+        }
+        if (bankTokens.u.length < reqU && bankTokens.d.length > 0) {
+          alert(`¡Te faltan unidades sueltas! Usa el botón "Canjear D en Reserva (1D → 10U)" para obtener unidades individuales.`);
+          return;
+        }
+      } else {
+        // En modo guiado automático, realizar los canjes necesarios
+        while (bankTokens.d.length < reqD && bankTokens.c.length > 0) splitBankC();
+        while (bankTokens.u.length < reqU && bankTokens.d.length > 0) splitBankD();
       }
 
-      // Tomar las fichas físicas exactas del banco
+      // Extraer fichas para la caja
       const boxTokens = [];
-      for (let i = 0; i < reqD; i++) {
-        if (bankTokens.d.length > 0) {
-          const tok = bankTokens.d.pop();
-          tok.userData.location = 'crate';
-          boxTokens.push(tok);
-        }
+      let dToTake = Math.min(reqD, bankTokens.d.length);
+      let uNeeded = divisor - (dToTake * 10);
+
+      // Si las unidades no alcanzan para cubrir el resto, tomar menos decenas o completar
+      if (bankTokens.u.length < uNeeded && bankTokens.d.length > dToTake) {
+        while (bankTokens.u.length < uNeeded && bankTokens.d.length > 0) splitBankD();
+        dToTake = Math.min(reqD, bankTokens.d.length);
+        uNeeded = divisor - (dToTake * 10);
       }
-      for (let i = 0; i < reqU; i++) {
+
+      for (let i = 0; i < dToTake; i++) {
+        const tok = bankTokens.d.pop();
+        tok.userData.location = 'crate';
+        tok.userData.crateIdx = cratesData.length;
+        boxTokens.push(tok);
+      }
+
+      for (let i = 0; i < uNeeded; i++) {
         if (bankTokens.u.length > 0) {
           const tok = bankTokens.u.pop();
           tok.userData.location = 'crate';
+          tok.userData.crateIdx = cratesData.length;
           boxTokens.push(tok);
         }
       }
 
       reflowBank();
 
-      // Crear caja organizadora abierta 3D
+      // Crear caja organizadora 3D
       const crateIdx = cratesData.length;
       const crateMesh = createOpenCrateMesh(crateIdx);
 
-      // Posicionar cajas abiertas en fila o matriz
       const col = crateIdx % 4;
       const row = Math.floor(crateIdx / 4);
       const crateX = 2 + (col * 8.6);
@@ -692,9 +844,10 @@
       cratesData.push(crateRecord);
 
       reflowTokensInsideCrate(crateRecord);
+      playRealisticSound('drop');
     }
 
-    /* Organiza las fichas dentro de la caja de forma perfectamente visible */
+    /* Ubicación interior visible de las fichas dentro de cada caja */
     function reflowTokensInsideCrate(crateRecord) {
       const cratePos = crateRecord.crateMesh.position;
       const tokens = crateRecord.tokens;
@@ -702,31 +855,43 @@
       const dTokens = tokens.filter(t => t.userData.type === 'd');
       const uTokens = tokens.filter(t => t.userData.type === 'u');
 
-      // Decenas ordenadas en la mitad izquierda de la caja
-      dTokens.forEach((t, i) => {
-        const posX = cratePos.x - 1.8;
-        const posZ = cratePos.z - 2.2 + (i * 2.6);
-        snapTo(t, new THREE.Vector3(posX, 0.35, posZ));
-      });
+      if (dTokens.length > 0) {
+        // Decenas a la izquierda
+        dTokens.forEach((t, i) => {
+          const posX = cratePos.x - 1.8;
+          const posZ = cratePos.z - 2.5 + (i * 2.5);
+          snapTo(t, new THREE.Vector3(posX, 0.35, posZ));
+        });
 
-      // Unidades ordenadas en columnas en la mitad derecha de la caja
-      uTokens.forEach((t, i) => {
-        const col = i % 2;
-        const row = Math.floor(i / 2);
-        const posX = cratePos.x + 0.8 + (col * 2.2);
-        const posZ = cratePos.z - 3.4 + (row * 1.5);
-        snapTo(t, new THREE.Vector3(posX, 0.35, posZ));
-      });
+        // Unidades a la derecha en 2 columnas
+        uTokens.forEach((t, i) => {
+          const col = i % 2;
+          const row = Math.floor(i / 2);
+          const posX = cratePos.x + 0.8 + (col * 1.8);
+          const posZ = cratePos.z - 3.8 + (row * 1.5);
+          snapTo(t, new THREE.Vector3(posX, 0.35, posZ));
+        });
+      } else {
+        // Todas son unidades sueltas: distribuir en 3 columnas a lo ancho
+        uTokens.forEach((t, i) => {
+          const layer = Math.floor(i / 21);
+          const idxInLayer = i % 21;
+          const col = idxInLayer % 3;
+          const row = Math.floor(idxInLayer / 3);
+          const posX = cratePos.x - 2.2 + (col * 2.2);
+          const posZ = cratePos.z - 4.0 + (row * 1.35);
+          snapTo(t, new THREE.Vector3(posX, 0.35 + (layer * 0.38), posZ));
+        });
+      }
     }
 
-    /* DESAGRUPAR DECENAS DENTRO DE LAS CAJAS PARA VER LAS 21 UNIDADES REALES */
+    /* Desagrupación dentro de las cajas */
     function unpackTensInsideBoxes() {
       let unbundledAny = false;
 
       cratesData.forEach(crateRecord => {
         const dTokens = crateRecord.tokens.filter(t => t.userData.type === 'd');
         if (dTokens.length > 0) {
-          // Tomar 1 decena de la caja y canjearla por 10 unidades dentro de la misma caja
           const tokD = dTokens.pop();
           const idx = crateRecord.tokens.indexOf(tokD);
           if (idx !== -1) crateRecord.tokens.splice(idx, 1);
@@ -737,6 +902,7 @@
           for (let i = 0; i < 10; i++) {
             const newU = createTokenMesh('u');
             newU.userData.location = 'crate';
+            newU.userData.crateIdx = crateRecord.crateMesh.userData.index;
             newU.position.set(spawnPos.x, spawnPos.y + (i * 0.2), spawnPos.z);
             tokensGroup.add(newU);
             crateRecord.tokens.push(newU);
@@ -749,47 +915,58 @@
 
       if (unbundledAny) {
         confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+        playRealisticSound('exchange');
       } else {
         alert("Ya todas las decenas en las cajas han sido desagrupadas en unidades.");
       }
     }
 
     /* =========================================================================
-       4. SECUENCIA DIDÁCTICA Y CUADRÍCULA (Basada en la imagen)
+       5. SECUENCIA DIDÁCTICA Y CUADRÍCULA
        ========================================================================= */
     function generateDidacticPlan() {
       stepsList = [];
       const divStr = dividend.toString();
       const disStr = divisor.toString();
       const firstDivisorDigit = parseInt(disStr[0]);
-      const dDigit = parseInt(divStr[0]);
-      const estimatedQ = Math.floor(dividend / divisor);
-      const product = estimatedQ * divisor;
-      const rem = dividend - product;
 
-      stepsList.push({
-        step: 1,
-        title: "Comparamos las cifras de las decenas.",
-        action: "compare_d"
-      });
+      if (dividend < 100) {
+        const dDigit = parseInt(divStr[0]);
+        const estimatedQ = Math.floor(dividend / divisor);
+        const product = estimatedQ * divisor;
+        const rem = dividend - product;
 
-      stepsList.push({
-        step: 2,
-        title: `Como ${dDigit} ÷ ${firstDivisorDigit} = ${estimatedQ}, escribimos ${estimatedQ} en la posición de las unidades del cociente.`,
-        action: "write_q_u"
-      });
+        stepsList.push({ step: 1, title: "Comparamos las cifras de las decenas." });
+        stepsList.push({ step: 2, title: `Como ${dDigit} ÷ ${firstDivisorDigit} = ${estimatedQ}, escribimos ${estimatedQ} en el cociente.` });
+        stepsList.push({ step: 3, title: `Calculamos ${estimatedQ} x ${divisor} = ${product}, restamos ${dividend} - ${product} = ${rem}.` });
+        stepsList.push({ step: 4, title: `El cociente es ${estimatedQ} y el residuo es ${rem}.` });
+      } else {
+        const firstTwo = parseInt(divStr.slice(0, 2));
+        if (firstTwo >= divisor) {
+          const q1 = Math.floor(firstTwo / divisor);
+          const prod1 = q1 * divisor;
+          const rem1 = firstTwo - prod1;
+          const thirdDigit = divStr[2];
+          const val2 = rem1 * 10 + parseInt(thirdDigit);
+          const q2 = Math.floor(val2 / divisor);
+          const prod2 = q2 * divisor;
+          const rem2 = val2 - prod2;
 
-      stepsList.push({
-        step: 3,
-        title: `Calculamos ${estimatedQ} x ${divisor} = ${product}, restamos ${dividend} - ${product} = ${rem}.`,
-        action: "subtract"
-      });
-
-      stepsList.push({
-        step: 4,
-        title: `Por lo tanto, el cociente de ${dividend} ÷ ${divisor} es ${estimatedQ} y el residuo es ${rem}.`,
-        action: "finish"
-      });
+          stepsList.push({ step: 1, title: `Como ${firstTwo} ≥ ${divisor}, tomamos las 2 primeras cifras (${firstTwo}). Escribimos ${q1} en las decenas del cociente.` });
+          stepsList.push({ step: 2, title: `Multiplicamos ${q1} × ${divisor} = ${prod1}. Restamos ${firstTwo} - ${prod1} = ${rem1}.` });
+          stepsList.push({ step: 3, title: `Bajamos la siguiente cifra (${thirdDigit}) formando el ${val2}.` });
+          stepsList.push({ step: 4, title: `Dividimos ${val2} ÷ ${divisor} = ${q2}. Escribimos ${q2} en las unidades del cociente.` });
+          stepsList.push({ step: 5, title: `Restamos ${val2} - ${prod2} = ${rem2}. Cociente: ${Math.floor(dividend/divisor)}, Residuo: ${rem2}.` });
+        } else {
+          const q = Math.floor(dividend / divisor);
+          const prod = q * divisor;
+          const rem = dividend - prod;
+          stepsList.push({ step: 1, title: `Como ${firstTwo} < ${divisor}, tomamos las 3 cifras (${dividend}).` });
+          stepsList.push({ step: 2, title: `Estimamos ${firstTwo} ÷ ${firstDivisorDigit} y probamos con ${q} en el cociente.` });
+          stepsList.push({ step: 3, title: `Multiplicamos ${q} × ${divisor} = ${prod}. Restamos ${dividend} - ${prod} = ${rem}.` });
+          stepsList.push({ step: 4, title: `El cociente es ${q} y el residuo es ${rem}.` });
+        }
+      }
     }
 
     function renderTimeline() {
@@ -809,17 +986,25 @@
     function renderEmptyGrid() {
       const grid = document.getElementById('mathGrid');
       grid.innerHTML = '';
-      for (let r = 0; r < 5; r++) {
-        for (let c = 0; c < 5; c++) {
+      for (let r = 0; r < 6; r++) {
+        for (let c = 0; c < 6; c++) {
           const cell = document.createElement('div');
           cell.className = 'grid-cell';
           cell.id = `g_${r}_${c}`;
           grid.appendChild(cell);
         }
       }
-      setGrid(0, 1, 'D', 'cell-d');
-      setGrid(0, 2, 'U', 'cell-u');
-      drawGalera();
+
+      if (dividend < 100) {
+        setGrid(0, 1, 'D', 'cell-d');
+        setGrid(0, 2, 'U', 'cell-u');
+        drawGalera(3);
+      } else {
+        setGrid(0, 0, 'C', 'cell-c');
+        setGrid(0, 1, 'D', 'cell-d');
+        setGrid(0, 2, 'U', 'cell-u');
+        drawGalera(3);
+      }
     }
 
     function setGrid(r, c, text, cls = '') {
@@ -830,32 +1015,32 @@
       }
     }
 
-    function drawGalera() {
+    function drawGalera(divisorCol) {
       const grid = document.getElementById('mathGrid');
-      const CELL = 42;
+      const CELL = 40;
       const v = document.createElement('div');
       v.className = 'divisor-line-v';
-      v.style.left = `${3 * CELL}px`;
+      v.style.left = `${divisorCol * CELL}px`;
       v.style.top = `${1 * CELL}px`;
       v.style.height = `${CELL + 2}px`;
       grid.appendChild(v);
 
       const h = document.createElement('div');
       h.className = 'divisor-line-h';
-      h.style.left = `${3 * CELL}px`;
+      h.style.left = `${divisorCol * CELL}px`;
       h.style.top = `${2 * CELL}px`;
-      h.style.width = `${2 * CELL}px`;
+      h.style.width = `${3 * CELL}px`;
       grid.appendChild(h);
     }
 
-    function drawMinusLine(row) {
+    function drawMinusLine(row, startCol, endCol) {
       const grid = document.getElementById('mathGrid');
-      const CELL = 42;
+      const CELL = 40;
       const m = document.createElement('div');
       m.className = 'minus-line';
-      m.style.left = `4px`;
+      m.style.left = `${startCol * CELL + 3}px`;
       m.style.top = `${(row + 1) * CELL}px`;
-      m.style.width = `${3 * CELL - 8}px`;
+      m.style.width = `${(endCol - startCol + 1) * CELL - 6}px`;
       grid.appendChild(m);
     }
 
@@ -863,27 +1048,84 @@
       const divStr = dividend.toString();
       const disStr = divisor.toString();
 
-      setGrid(1, 1, divStr[0]);
-      setGrid(1, 2, divStr[1]);
-      setGrid(1, 3, disStr[0]);
-      setGrid(1, 4, disStr[1]);
+      if (dividend < 100) {
+        setGrid(1, 1, divStr[0]);
+        setGrid(1, 2, divStr[1]);
+        setGrid(1, 3, disStr[0]);
+        setGrid(1, 4, disStr[1]);
 
-      if (stepIdx >= 1) {
-        const qVal = Math.floor(dividend / divisor);
-        setGrid(2, 3, qVal.toString());
-        setGrid(3, 3, 'U', 'cell-u');
-      }
+        if (stepIdx >= 1) {
+          const qVal = Math.floor(dividend / divisor);
+          setGrid(2, 3, qVal.toString());
+          setGrid(3, 3, 'U', 'cell-u');
+        }
+        if (stepIdx >= 2) {
+          const qVal = Math.floor(dividend / divisor);
+          const prodStr = (qVal * divisor).toString();
+          setGrid(2, 0, '—');
+          setGrid(2, 1, prodStr[0], 'sub-digit');
+          setGrid(2, 2, prodStr[1], 'sub-digit');
+          drawMinusLine(2, 0, 2);
 
-      if (stepIdx >= 2) {
-        const qVal = Math.floor(dividend / divisor);
-        const prodStr = (qVal * divisor).toString();
-        setGrid(2, 0, '—');
-        setGrid(2, 1, prodStr[0], 'sub-digit');
-        setGrid(2, 2, prodStr[1], 'sub-digit');
-        drawMinusLine(2);
+          const rem = dividend % divisor;
+          setGrid(3, 2, rem.toString());
+        }
+      } else {
+        setGrid(1, 0, divStr[0]);
+        setGrid(1, 1, divStr[1]);
+        setGrid(1, 2, divStr[2]);
+        setGrid(1, 3, disStr[0]);
+        setGrid(1, 4, disStr[1]);
 
-        const rem = dividend % divisor;
-        setGrid(3, 2, rem.toString());
+        const firstTwo = parseInt(divStr.slice(0, 2));
+        if (firstTwo >= divisor) {
+          const q1 = Math.floor(firstTwo / divisor);
+          const prod1 = (q1 * divisor).toString();
+          const rem1 = firstTwo - (q1 * divisor);
+
+          if (stepIdx >= 1) {
+            setGrid(2, 3, q1.toString());
+            setGrid(3, 3, 'D', 'cell-d');
+          }
+          if (stepIdx >= 2) {
+            setGrid(2, 0, prod1[0], 'sub-digit');
+            setGrid(2, 1, prod1[1], 'sub-digit');
+            drawMinusLine(2, 0, 1);
+            setGrid(3, 1, rem1.toString());
+          }
+          if (stepIdx >= 3) {
+            setGrid(3, 2, divStr[2]);
+          }
+          if (stepIdx >= 4) {
+            const val2 = rem1 * 10 + parseInt(divStr[2]);
+            const q2 = Math.floor(val2 / divisor);
+            const prod2 = (q2 * divisor).toString();
+            const rem2 = val2 - (q2 * divisor);
+
+            setGrid(2, 4, q2.toString());
+            setGrid(3, 4, 'U', 'cell-u');
+            setGrid(4, 1, prod2[0], 'sub-digit');
+            setGrid(4, 2, prod2[1], 'sub-digit');
+            drawMinusLine(4, 1, 2);
+            setGrid(5, 2, rem2.toString());
+          }
+        } else {
+          const q = Math.floor(dividend / divisor);
+          const prod = (q * divisor).toString();
+          const rem = dividend - (q * divisor);
+
+          if (stepIdx >= 1) {
+            setGrid(2, 3, q.toString());
+            setGrid(3, 3, 'U', 'cell-u');
+          }
+          if (stepIdx >= 2) {
+            setGrid(2, 0, prod[0], 'sub-digit');
+            setGrid(2, 1, prod[1], 'sub-digit');
+            setGrid(2, 2, prod[2] || '', 'sub-digit');
+            drawMinusLine(2, 0, 2);
+            setGrid(3, 2, rem.toString());
+          }
+        }
       }
     }
 
@@ -893,14 +1135,48 @@
         renderTimeline();
         applyStepToGrid(currentStep);
 
-        // Al llegar al paso de estimar/comprobar, llena automáticamente las cajas con sus fichas
-        if (currentStep === 2) {
+        // Al finalizar la explicación teórica, llenar automáticamente las cajas correspondientes
+        if (currentStep === stepsList.length - 1) {
           const q = Math.floor(dividend / divisor);
-          for (let i = 0; i < q; i++) {
-            setTimeout(() => packOneVisibleBox(), i * 160);
+          for (let i = cratesData.length; i < q; i++) {
+            setTimeout(() => packOneVisibleBox(true), (i - cratesData.length) * 160);
           }
+          confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } });
         }
       }
+    }
+
+    /* Síntesis Sonora */
+    let audioCtx = null;
+    function playRealisticSound(type) {
+      try {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        if (!audioCtx) audioCtx = new AudioClass();
+        const now = audioCtx.currentTime;
+
+        if (type === 'exchange') {
+          for (let i = 0; i < 4; i++) {
+            setTimeout(() => {
+              const osc = audioCtx.createOscillator();
+              const g = audioCtx.createGain();
+              osc.frequency.setValueAtTime(2600 + Math.random() * 400, audioCtx.currentTime);
+              g.gain.setValueAtTime(0.2, audioCtx.currentTime);
+              g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+              osc.connect(g); g.connect(audioCtx.destination);
+              osc.start(); osc.stop(audioCtx.currentTime + 0.045);
+            }, i * 30);
+          }
+        } else if (type === 'drop') {
+          const osc = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          osc.frequency.setValueAtTime(1200, now);
+          osc.frequency.exponentialRampToValueAtTime(400, now + 0.05);
+          g.gain.setValueAtTime(0.25, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+          osc.connect(g); g.connect(audioCtx.destination);
+          osc.start(); osc.stop(now + 0.055);
+        }
+      } catch(e) {}
     }
 
     /* Bucle Render */
