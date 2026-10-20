@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>División por 2 Cifras: Cajas con Unidades Visibles</title>
+  <title>División por 2 Cifras: Cajas Grandes con Pilas Verticales</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
@@ -390,16 +390,16 @@
     <div class="config-card">
       <div class="input-grp">
         <span>Dividendo:</span>
-        <input type="number" id="inpDividend" class="num-input" min="10" max="999" value="144">
+        <input type="number" id="inpDividend" class="num-input" min="10" max="999" value="84">
       </div>
       <div class="input-grp">
         <span>Divisor:</span>
-        <input type="number" id="inpDivisor" class="num-input" min="10" max="99" value="24">
+        <input type="number" id="inpDivisor" class="num-input" min="10" max="99" value="21">
       </div>
       <button class="btn" onclick="initSimulation()"><i class="fa-solid fa-play"></i> Resolver</button>
+      <button class="btn btn-secondary" onclick="preset(84, 21)">84 ÷ 21 (21 por Caja)</button>
       <button class="btn btn-secondary" onclick="preset(144, 24)">144 ÷ 24 (Centena)</button>
       <button class="btn btn-secondary" onclick="preset(288, 24)">288 ÷ 24 (2 Centenas)</button>
-      <button class="btn btn-secondary" onclick="preset(84, 21)">84 ÷ 21 (Decenas)</button>
       <button class="btn btn-secondary" onclick="preset(96, 32)">96 ÷ 32</button>
       <button class="btn btn-secondary" onclick="preset(68, 12)">68 ÷ 12</button>
     </div>
@@ -421,7 +421,6 @@
 
   <!-- Barra de Operaciones con Desagrupación en Dividendo -->
   <div class="bottom-toolbar">
-    <!-- Indicador en Vivo del Dividendo -->
     <div class="bank-live-badge" title="Fichas disponibles en el dividendo">
       <span>Dividendo:</span>
       <span class="badge-pill pill-c" id="badgeCountC">0 C</span>
@@ -430,27 +429,22 @@
       <span style="color:#0284c7; font-weight:800;" id="badgeTotalU">(0u)</span>
     </div>
 
-    <!-- Botón Desagrupar Centenas en Dividendo -->
     <button class="action-btn btn-split-c" id="btnSplitC" onclick="splitBankC()" title="Canjear 1 Centena en 10 Decenas">
-      <i class="fa-solid fa-scissors"></i> Canjear C en Reserva (1C → 10D)
+      <i class="fa-solid fa-scissors"></i> Canjear C (1C → 10D)
     </button>
 
-    <!-- Botón Desagrupar Decenas en Dividendo -->
     <button class="action-btn btn-split-d" id="btnSplitD" onclick="splitBankD()" title="Canjear 1 Decena en 10 Unidades">
-      <i class="fa-solid fa-scissors"></i> Canjear D en Reserva (1D → 10U)
+      <i class="fa-solid fa-scissors"></i> Canjear D (1D → 10U)
     </button>
 
-    <!-- Llenar Caja Abierta -->
     <button class="action-btn btn-pack-1" id="btnPack1" onclick="packOneVisibleBox(false)">
-      <i class="fa-solid fa-box-open"></i> Llenar 1 Caja (<span id="lblCost1">24u</span>)
+      <i class="fa-solid fa-box-open"></i> Llenar 1 Caja (<span id="lblCost1">21u</span>)
     </button>
 
-    <!-- Desagrupar dentro de las cajas -->
     <button class="action-btn btn-split-box" id="btnSplitBoxes" onclick="unpackTensInsideBoxes()">
       <i class="fa-solid fa-arrows-split-up-and-left"></i> Desagrupar D en Cajas
     </button>
 
-    <!-- Avanzar paso guiado -->
     <button class="action-btn btn-step" id="btnNextStep" onclick="advanceStep()">
       <i class="fa-solid fa-forward-step"></i> Siguiente Paso
     </button>
@@ -470,7 +464,7 @@
     scene.fog = new THREE.FogExp2(0xf1f5f9, 0.007);
 
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 52, 66);
+    camera.position.set(2, 58, 70);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -484,31 +478,31 @@
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.maxPolarAngle = Math.PI / 2.05;
-    controls.target.set(0, 2, 0);
+    controls.target.set(5, 2, 0);
 
     const hemiLight = new THREE.HemisphereLight(0xffffff, 0xe2e8f0, 0.95);
     scene.add(hemiLight);
 
     const dirLight = new THREE.DirectionalLight(0xffffff, 1.25);
-    dirLight.position.set(24, 52, 24);
+    dirLight.position.set(28, 54, 26);
     dirLight.castShadow = true;
     scene.add(dirLight);
 
-    // Mesa Principal
+    // Mesa Principal Ampliada
     const tableMesh = new THREE.Mesh(
-      new THREE.BoxGeometry(98, 1.5, 48),
+      new THREE.BoxGeometry(114, 1.5, 52),
       new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 })
     );
     tableMesh.position.y = -0.75;
     tableMesh.receiveShadow = true;
     scene.add(tableMesh);
 
-    // Divisoria entre Reserva de Dividendo (izq) y Cajas Abiertas (der)
+    // Divisoria entre Reserva y Cajas
     const divider = new THREE.Mesh(
-      new THREE.BoxGeometry(0.4, 0.4, 44),
+      new THREE.BoxGeometry(0.4, 0.4, 48),
       new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.3 })
     );
-    divider.position.set(-7, 0.2, 0);
+    divider.position.set(-8, 0.2, 0);
     scene.add(divider);
 
     const tokensGroup = new THREE.Group();
@@ -535,13 +529,17 @@
     const texC = createTokenTexture('C', '#dcfce7', '#16a34a', '#15803d');
     const texD = createTokenTexture('D', '#fef9c3', '#eab308', '#854d0e');
     const texU = createTokenTexture('U', '#e0f2fe', '#0284c7', '#0369a1');
-    const geomCylinder = new THREE.CylinderGeometry(1.05, 1.05, 0.34, 32);
+
+    /* DIMENSIONES DE FICHAS: DIÁMETRO 1.4, ALTURA 0.30 */
+    const TOKEN_RADIUS = 0.70;
+    const TOKEN_HEIGHT = 0.30;
+    const geomCylinder = new THREE.CylinderGeometry(TOKEN_RADIUS, TOKEN_RADIUS, TOKEN_HEIGHT, 32);
 
     function createTokenMesh(type) {
       let topTex = (type === 'c') ? texC : (type === 'd' ? texD : texU);
       let sideColor = (type === 'c') ? 0x16a34a : (type === 'd' ? 0xeab308 : 0x0284c7);
       const mats = [
-        new THREE.MeshStandardMaterial({ color: sideColor, roughness: 0.3 }),
+        new THREE.MeshStandardMaterial({ color: sideColor, roughness: 0.35 }),
         new THREE.MeshStandardMaterial({ map: topTex, roughness: 0.25 }),
         new THREE.MeshStandardMaterial({ map: topTex, roughness: 0.25 })
       ];
@@ -551,8 +549,8 @@
       return mesh;
     }
 
-    /* Caja Abierta con Visibilidad Total */
-    function createOpenCrateMesh(index, width = 7.6, depth = 11.2) {
+    /* CAJA GRANDE: Ancho 12.0, Profundidad 15.0 con Bases Circulares Indicadoras */
+    function createOpenCrateMesh(index, width = 12.0, depth = 15.0) {
       const crate = new THREE.Group();
       const wallMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.3 });
       const floorMat = new THREE.MeshStandardMaterial({ color: 0xf0f9ff, roughness: 0.4 });
@@ -562,7 +560,7 @@
       floor.receiveShadow = true;
       crate.add(floor);
 
-      const h = 0.8;
+      const h = 0.85;
       const th = 0.25;
 
       const back = new THREE.Mesh(new THREE.BoxGeometry(width, h, th), wallMat);
@@ -577,7 +575,24 @@
       const right = new THREE.Mesh(new THREE.BoxGeometry(th, h, depth), wallMat);
       right.position.set(width / 2, h / 2, 0); crate.add(right);
 
-      // Etiqueta numerada
+      // Bases circulares sutiles en el fondo donde se posan las pilas verticales
+      const spotMat = new THREE.MeshStandardMaterial({ color: 0xbae6fd, roughness: 0.6 });
+      const spotGeom = new THREE.CylinderGeometry(0.85, 0.85, 0.02, 24);
+
+      // 6 pedestales con separación holgada de 5.2 en X y 4.2 en Z
+      const colOffsetsX = [-2.8, 2.8];
+      const rowOffsetsZ = [-4.2, 0, 4.2];
+
+      colOffsetsX.forEach(ox => {
+        rowOffsetsZ.forEach(oz => {
+          const spot = new THREE.Mesh(spotGeom, spotMat);
+          spot.position.set(ox, 0.16, oz);
+          spot.receiveShadow = true;
+          crate.add(spot);
+        });
+      });
+
+      // Rótulo frontal exterior despejado
       const labelC = document.createElement('canvas');
       labelC.width = 256; labelC.height = 64;
       const lctx = labelC.getContext('2d');
@@ -587,11 +602,11 @@
       lctx.fillText(`Caja ${index + 1}`, 128, 46);
       const lTex = new THREE.CanvasTexture(labelC);
       const labelMesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(width * 0.8, 1.2),
+        new THREE.PlaneGeometry(width * 0.6, 1.3),
         new THREE.MeshBasicMaterial({ map: lTex, transparent: true })
       );
       labelMesh.rotation.x = -Math.PI / 2;
-      labelMesh.position.set(0, 0.16, -depth / 2 + 1.2);
+      labelMesh.position.set(0, 0.16, depth / 2 + 1.1);
       crate.add(labelMesh);
 
       crate.userData = { width, depth, index };
@@ -601,8 +616,8 @@
     /* =========================================================================
        2. ESTADO GLOBAL Y DISTRIBUCIÓN
        ========================================================================= */
-    let dividend = 144;
-    let divisor = 24;
+    let dividend = 84;
+    let divisor = 21;
     let currentStep = 0;
     let stepsList = [];
 
@@ -664,31 +679,31 @@
       });
     }
 
-    /* Ubicación ordenada sin colisiones en la reserva */
+    /* Ubicación en Reserva: Pilas puramente verticales sin amontonamiento */
     function reflowBank() {
-      // Centenas: Columna en X = -40
+      // Centenas: Columna en X = -43
       bankTokens.c.forEach((tok, i) => {
         const stack = Math.floor(i / 10);
         const h = i % 10;
-        snapTo(tok, new THREE.Vector3(-40, 0.35 + (h * 0.38), -12 + (stack * 3.4)));
+        snapTo(tok, new THREE.Vector3(-43, 0.25 + (h * 0.32), -12 + (stack * 3.4)));
       });
 
-      // Decenas: Columnas en X = -29 a -26
+      // Decenas: Columnas en X = -33 a -26
       bankTokens.d.forEach((tok, i) => {
         const stack = Math.floor(i / 10);
         const h = i % 10;
         const colX = Math.floor(stack / 7) * 2.8;
         const localStackZ = stack % 7;
-        snapTo(tok, new THREE.Vector3(-29 + colX, 0.35 + (h * 0.38), -13 + (localStackZ * 3.4)));
+        snapTo(tok, new THREE.Vector3(-33 + colX, 0.25 + (h * 0.32), -13 + (localStackZ * 3.4)));
       });
 
-      // Unidades: Columnas en X = -19 a -11
+      // Unidades: Columnas en X = -22 a -12
       bankTokens.u.forEach((tok, i) => {
         const stack = Math.floor(i / 10);
         const h = i % 10;
-        const colX = Math.floor(stack / 8) * 2.5;
+        const colX = Math.floor(stack / 8) * 2.6;
         const localStackZ = stack % 8;
-        snapTo(tok, new THREE.Vector3(-19 + colX, 0.35 + (h * 0.38), -13 + (localStackZ * 3.4)));
+        snapTo(tok, new THREE.Vector3(-22 + colX, 0.25 + (h * 0.32), -13 + (localStackZ * 3.4)));
       });
 
       updateBadgeCounts();
@@ -760,17 +775,14 @@
       if (intersects.length > 0) {
         let picked = intersects[0].object;
         if (picked.userData && picked.userData.location === 'bank') {
-          if (picked.userData.type === 'c') {
-            splitBankC();
-          } else if (picked.userData.type === 'd') {
-            splitBankD();
-          }
+          if (picked.userData.type === 'c') splitBankC();
+          else if (picked.userData.type === 'd') splitBankD();
         }
       }
     });
 
     /* =========================================================================
-       4. LLENADO DE CAJAS ABIERTAS CON UNIDADES VISIBLES
+       4. LLENADO DE CAJAS GRANDES CON PILAS VERTICALES
        ========================================================================= */
     function packOneVisibleBox(autoUnbundle = false) {
       const totalBank = (bankTokens.c.length * 100) + (bankTokens.d.length * 10) + bankTokens.u.length;
@@ -782,28 +794,24 @@
       const reqD = Math.floor(divisor / 10);
       const reqU = divisor % 10;
 
-      // Si se ejecuta manualmente sin suficientes decenas, orientar al alumno a canjear
       if (!autoUnbundle) {
         if (bankTokens.d.length < reqD && bankTokens.c.length > 0) {
-          alert(`¡No tienes suficientes decenas sueltas para la caja! Usa el botón "Canjear C en Reserva (1C → 10D)" para desagrupar tu centena.`);
+          alert(`¡No tienes suficientes decenas sueltas para la caja! Usa el botón "Canjear C (1C → 10D)" para desagrupar tu centena.`);
           return;
         }
         if (bankTokens.u.length < reqU && bankTokens.d.length > 0) {
-          alert(`¡Te faltan unidades sueltas! Usa el botón "Canjear D en Reserva (1D → 10U)" para obtener unidades individuales.`);
+          alert(`¡Te faltan unidades sueltas! Usa el botón "Canjear D (1D → 10U)" para obtener unidades individuales.`);
           return;
         }
       } else {
-        // En modo guiado automático, realizar los canjes necesarios
         while (bankTokens.d.length < reqD && bankTokens.c.length > 0) splitBankC();
         while (bankTokens.u.length < reqU && bankTokens.d.length > 0) splitBankD();
       }
 
-      // Extraer fichas para la caja
       const boxTokens = [];
       let dToTake = Math.min(reqD, bankTokens.d.length);
       let uNeeded = divisor - (dToTake * 10);
 
-      // Si las unidades no alcanzan para cubrir el resto, tomar menos decenas o completar
       if (bankTokens.u.length < uNeeded && bankTokens.d.length > dToTake) {
         while (bankTokens.u.length < uNeeded && bankTokens.d.length > 0) splitBankD();
         dToTake = Math.min(reqD, bankTokens.d.length);
@@ -828,14 +836,15 @@
 
       reflowBank();
 
-      // Crear caja organizadora 3D
       const crateIdx = cratesData.length;
       const crateMesh = createOpenCrateMesh(crateIdx);
 
-      const col = crateIdx % 4;
-      const row = Math.floor(crateIdx / 4);
-      const crateX = 2 + (col * 8.6);
-      const crateZ = -6 + (row * 12.5);
+      // Posicionamiento de las cajas amplias en la mesa
+      const maxCols = 4;
+      const col = crateIdx % maxCols;
+      const row = Math.floor(crateIdx / maxCols);
+      const crateX = 0 + (col * 13.5);
+      const crateZ = -6 + (row * 16.5);
 
       crateMesh.position.set(crateX, 0, crateZ);
       cratesGroup.add(crateMesh);
@@ -847,7 +856,7 @@
       playRealisticSound('drop');
     }
 
-    /* Ubicación interior visible de las fichas dentro de cada caja */
+    /* COLUMNAS VERTICALES PURAS: APILAMIENTO EN EL EJE Y CON SEPARACIÓN HORIZONTAL TOTAL */
     function reflowTokensInsideCrate(crateRecord) {
       const cratePos = crateRecord.crateMesh.position;
       const tokens = crateRecord.tokens;
@@ -855,32 +864,44 @@
       const dTokens = tokens.filter(t => t.userData.type === 'd');
       const uTokens = tokens.filter(t => t.userData.type === 'u');
 
+      // Coordenadas fijas de las bases (2 columnas en X: -2.8 y +2.8; 3 filas en Z: -4.2, 0, +4.2)
+      // Entre -2.8 y +2.8 hay 5.6 unidades de distancia (diámetro ficha = 1.4 -> 4.2 unidades libres de suelo!)
+      const spotCoords = [
+        { x: cratePos.x - 2.8, z: cratePos.z - 4.2 }, // Base 0
+        { x: cratePos.x - 2.8, z: cratePos.z },       // Base 1
+        { x: cratePos.x - 2.8, z: cratePos.z + 4.2 }, // Base 2
+        { x: cratePos.x + 2.8, z: cratePos.z - 4.2 }, // Base 3
+        { x: cratePos.x + 2.8, z: cratePos.z },       // Base 4
+        { x: cratePos.x + 2.8, z: cratePos.z + 4.2 }  // Base 5
+      ];
+
       if (dTokens.length > 0) {
-        // Decenas a la izquierda
+        // Decenas en la columna izquierda: cada decena en su base o apiladas verticalmente
         dTokens.forEach((t, i) => {
-          const posX = cratePos.x - 1.8;
-          const posZ = cratePos.z - 2.5 + (i * 2.5);
-          snapTo(t, new THREE.Vector3(posX, 0.35, posZ));
+          const base = spotCoords[i % 3];
+          snapTo(t, new THREE.Vector3(base.x, 0.25, base.z));
         });
 
-        // Unidades a la derecha en 2 columnas
+        // Unidades en la columna derecha apiladas verticalmente una sobre otra
         uTokens.forEach((t, i) => {
-          const col = i % 2;
-          const row = Math.floor(i / 2);
-          const posX = cratePos.x + 0.8 + (col * 1.8);
-          const posZ = cratePos.z - 3.8 + (row * 1.5);
-          snapTo(t, new THREE.Vector3(posX, 0.35, posZ));
+          const base = spotCoords[3]; // Columna derecha, base frontal
+          snapTo(t, new THREE.Vector3(base.x, 0.25 + (i * 0.32), base.z));
         });
       } else {
-        // Todas son unidades sueltas: distribuir en 3 columnas a lo ancho
+        // TODAS SON UNIDADES (TRAS DESAGRUPAR):
+        // Se apilan verticalmente en TORRES DE 10 UNIDADES (Equivalentes a 1 decena)
+        // Por ejemplo, para 21: Torre 0 (10u), Torre 1 (10u), Torre 2 (1u).
+        // ¡Cero amontonamiento horizontal! Cada torre tiene su propia base circular despejada.
         uTokens.forEach((t, i) => {
-          const layer = Math.floor(i / 21);
-          const idxInLayer = i % 21;
-          const col = idxInLayer % 3;
-          const row = Math.floor(idxInLayer / 3);
-          const posX = cratePos.x - 2.2 + (col * 2.2);
-          const posZ = cratePos.z - 4.0 + (row * 1.35);
-          snapTo(t, new THREE.Vector3(posX, 0.35 + (layer * 0.38), posZ));
+          const pileIdx = Math.floor(i / 10); // Cada torre almacena 10 fichas
+          const heightInPile = i % 10;
+          const base = spotCoords[pileIdx % spotCoords.length];
+
+          const posX = base.x;
+          const posY = 0.25 + (heightInPile * 0.32); // Apilamiento estrictamente vertical en Y
+          const posZ = base.z;
+
+          snapTo(t, new THREE.Vector3(posX, posY, posZ));
         });
       }
     }
@@ -903,7 +924,7 @@
             const newU = createTokenMesh('u');
             newU.userData.location = 'crate';
             newU.userData.crateIdx = crateRecord.crateMesh.userData.index;
-            newU.position.set(spawnPos.x, spawnPos.y + (i * 0.2), spawnPos.z);
+            newU.position.set(spawnPos.x, spawnPos.y + (i * 0.15), spawnPos.z);
             tokensGroup.add(newU);
             crateRecord.tokens.push(newU);
           }
@@ -1135,11 +1156,10 @@
         renderTimeline();
         applyStepToGrid(currentStep);
 
-        // Al finalizar la explicación teórica, llenar automáticamente las cajas correspondientes
-        if (currentStep === stepsList.length - 1) {
+        if (currentStep === 2) {
           const q = Math.floor(dividend / divisor);
-          for (let i = cratesData.length; i < q; i++) {
-            setTimeout(() => packOneVisibleBox(true), (i - cratesData.length) * 160);
+          for (let i = 0; i < q; i++) {
+            setTimeout(() => packOneVisibleBox(true), i * 160);
           }
           confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } });
         }
@@ -1160,10 +1180,10 @@
               const osc = audioCtx.createOscillator();
               const g = audioCtx.createGain();
               osc.frequency.setValueAtTime(2600 + Math.random() * 400, audioCtx.currentTime);
-              g.gain.setValueAtTime(0.2, audioCtx.currentTime);
+              g.gain.setValueAtTime(0.18, audioCtx.currentTime);
               g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
               osc.connect(g); g.connect(audioCtx.destination);
-              osc.start(); osc.stop(audioCtx.currentTime + 0.045);
+              osc.start(); osc.stop(now + 0.045);
             }, i * 30);
           }
         } else if (type === 'drop') {
